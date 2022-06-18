@@ -1,4 +1,5 @@
 import { isObject } from "../shared/index";
+import { EShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 
 export function render(vnode, container){
@@ -6,9 +7,9 @@ export function render(vnode, container){
 }
 
 export function patch(vnode, container){
-  if(typeof vnode.type === 'string'){
+  if(vnode.shapeFlag & EShapeFlags.ELEMENT){
     processElement(vnode, container)
-  }else if ( isObject(vnode.type) ){
+  }else if ( vnode.shapeFlag & EShapeFlags.STATEFUL_COMPONENT ){
     propcessComponent(vnode, container)
   }
 }
@@ -27,9 +28,9 @@ function mountElement(vnode, container){
   }
 
   const { children } = vnode;
-  if( typeof children === 'string' ){
+  if( vnode.shapeFlag & EShapeFlags.TEXT_CHILDREN ){
     el.innerText = children;
-  }else if (Array.isArray(children)){
+  }else if ( vnode.shapeFlag & EShapeFlags.ARRAY_CHILDREN ){
     mountChildren(children, el)
   }
 

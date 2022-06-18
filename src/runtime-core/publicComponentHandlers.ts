@@ -10,7 +10,7 @@ export const publicComponentHandlers = {
       return setupState[key];
     }
     
-    // 但如果没再setupState中
+    // 但如果没再setupState中publicPropertiesMap
     const publicGetter = publicPropertiesMap[key];
     if( publicGetter ){
       return publicGetter(instance);
