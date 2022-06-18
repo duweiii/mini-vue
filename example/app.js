@@ -5,7 +5,10 @@ export const App = {
     return h('div',
     {
       id: 'root',
-      class: 'root-class'
+      class: 'root-class',
+      onClick(){
+        console.log( 'trigger click')
+      }
     },
     [h('div',{class: 'red'}, 'hi'), h('p', {class: 'blue'}, 'nihao: setup->msg ----> '+this.msg)]
     )

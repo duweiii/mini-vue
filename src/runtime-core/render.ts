@@ -21,10 +21,15 @@ function mountElement(vnode, container){
   let el = ( vnode.el = document.createElement(vnode.type));
 
   const { props } = vnode;
-
+  const isOn = (key: string) => /^on[A-Z]/.test(key);
   for (const attr in props) {
     const value = props[attr];
-    el.setAttribute(attr, value)
+    if( isOn(attr) ){
+      let eventType = attr.slice(2).toLowerCase();
+      el.addEventListener(eventType, value);
+    } else {
+      el.setAttribute(attr, value)
+    }
   }
 
   const { children } = vnode;
