@@ -1,4 +1,5 @@
 import { shallowReadonly } from "../reactiviy/reactive";
+import { publicComponentHandlers } from "./publicComponentHandlers";
 
 export function createComponentInstance(vnode){
   const instance = {
@@ -16,6 +17,7 @@ export function setupComponent(instance){
 }
 
 export function setupStateFulComponent(instance){
+  instance.proxy = new Proxy({_: instance}, publicComponentHandlers)
   const component = instance.type;
   const setup = component.setup;
   let setupResult;

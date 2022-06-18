@@ -7,7 +7,7 @@ export const App = {
       id: 'root',
       class: 'root-class'
     },
-    [h('div',{class: 'red'}, 'hi'), h('p', {class: 'blue'}, 'nihao')]
+    [h('div',{class: 'red'}, 'hi'), h('p', {class: 'blue'}, 'nihao: setup->msg ----> '+this.msg)]
     )
   },
   setup(){
