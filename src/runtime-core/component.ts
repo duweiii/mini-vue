@@ -34,7 +34,9 @@ export function setupStateFulComponent(instance){
     // const setupContext = createSetupContext(instance);
     // const setupReadonlyProps = shallowReadonly(instance.props)
     // setupResult = setup(setupReadonlyProps, setupContext);
-    setupResult = setup( shallowReadonly(instance.props), { emit: instance.emit } );
+    setupResult = setup( shallowReadonly(instance.props), {
+      emit: instance.emit
+    });
     handleSetupResult(instance, setupResult);
   }
 }
