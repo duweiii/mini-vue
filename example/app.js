@@ -13,7 +13,15 @@ export const App = {
     [
       h('div',{ class: 'red '}, 'hi'), 
       h('p', { class: 'blue' }, 'nihao: setup->msg ----> '+this.msg),
-      h(Foo, { count: 1 } )
+      h(
+        Foo, 
+        { 
+          count: 1, 
+          onAdd(a,b){
+            console.log(a,b,"____Dad component")
+          }
+        }
+      )
     ]
     )
   },
