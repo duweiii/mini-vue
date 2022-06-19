@@ -21,7 +21,11 @@ export const App = {
             console.log(a,b,"____Dad component")
           }
         },
-        h('p',{id: 'slot-id-p'}, '这是slot功能')
+        {
+          default: () => h('p',{id: 'slot-id-p-default'}, '这是slot的默认插槽'),
+          header: () => h('p',{id: 'slot-id-p-header'}, '这是slot的具名插槽，且name为header'),
+          footer: (info) => h('p',{id: 'slot-id-p-header'}, '这是slot的作用域插槽，且name为footer, 接受的参数为info: ' + info.name),
+        }
       )
     ]
     )

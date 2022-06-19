@@ -1,4 +1,4 @@
-import { h } from "../lib/guide-mini-vue.esm.js"
+import { h, renderSlots } from "../lib/guide-mini-vue.esm.js"
 
 export default {
   setup(props, { emit }){
@@ -20,6 +20,6 @@ export default {
     )
     const foo = h('div', {id:"button-brother"}, 'foooo-brother')
     // return h('div', { id: 'foo-id'}, 'read props via this：' + this.count)
-    return h('div',{}, [btn, foo, this.$slots])
+    return h('div',{}, [btn, foo, renderSlots(this.$slots, 'footer', { name: '这是作用域插槽传递的object.name'})])
   }
 }
