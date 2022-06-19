@@ -1,5 +1,11 @@
+import { EShapeFlags } from "../shared/shapeFlags";
+
 export function initSlots(instance, children){
-  normalizeSlotObject(instance, children);
+  // 并不是所有的组件实例都需要initSlots
+  const { vnode } = instance;
+  if( vnode.shapeFlag & EShapeFlags.SLOT_CHILDREN ){
+    normalizeSlotObject(instance, children);
+  }
 }
 
 function normalizeSlotObject(instance, children){
