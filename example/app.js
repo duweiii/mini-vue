@@ -1,5 +1,5 @@
 import { h } from '../lib/guide-mini-vue.esm.js';
-
+import Foo from './foo.js';
 export const App = {
   render(){
     return h('div',
@@ -10,7 +10,11 @@ export const App = {
         console.log( 'trigger click')
       }
     },
-    [h('div',{class: 'red'}, 'hi'), h('p', {class: 'blue'}, 'nihao: setup->msg ----> '+this.msg)]
+    [
+      h('div',{ class: 'red '}, 'hi'), 
+      h('p', { class: 'blue' }, 'nihao: setup->msg ----> '+this.msg),
+      h(Foo, { count: 1 } )
+    ]
     )
   },
   setup(){
