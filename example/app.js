@@ -20,7 +20,8 @@ export const App = {
           onAdd(a,b){
             console.log(a,b,"____Dad component")
           }
-        }
+        },
+        h('p',{id: 'slot-id-p'}, '这是slot功能')
       )
     ]
     )

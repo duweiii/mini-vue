@@ -20,6 +20,6 @@ export default {
     )
     const foo = h('div', {id:"button-brother"}, 'foooo-brother')
     // return h('div', { id: 'foo-id'}, 'read props via this：' + this.count)
-    return h('div',{}, [btn, foo])
+    return h('div',{}, [btn, foo, this.$slots])
   }
 }
