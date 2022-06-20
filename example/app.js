@@ -1,6 +1,7 @@
-import { createTextVNode, h } from '../lib/guide-mini-vue.esm.js';
+import { createTextVNode, getCurrentInstance, h } from '../lib/guide-mini-vue.esm.js';
 import Foo from './foo.js';
 export const App = {
+  name: 'App',
   render(){
     return h('div',
     {
@@ -32,6 +33,7 @@ export const App = {
     )
   },
   setup(){
+    console.log( getCurrentInstance() )
     return {
       msg: 'hello world'
     }

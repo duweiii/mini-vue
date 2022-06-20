@@ -3,7 +3,7 @@ import { emit } from "./componentEmit";
 import { initProps } from "./componentProps";
 import { initSlots } from "./componentSlots";
 import { publicComponentHandlers } from "./publicComponentHandlers";
-
+let currentInstance = null;
 export function createComponentInstance(vnode){
   const instance = {
     vnode,
@@ -20,7 +20,6 @@ export function createComponentInstance(vnode){
 }
 
 export function setupComponent(instance){
-  // instance.proxy = new Proxy(instance.ctx, instanceProxyHandlers)
   initProps(instance, instance.vnode.props)
   initSlots(instance, instance.vnode.children)
   setupStateFulComponent(instance)
@@ -35,9 +34,11 @@ export function setupStateFulComponent(instance){
     // const setupContext = createSetupContext(instance);
     // const setupReadonlyProps = shallowReadonly(instance.props)
     // setupResult = setup(setupReadonlyProps, setupContext);
+    setCurrentInstance(instance)
     setupResult = setup( shallowReadonly(instance.props), {
       emit: instance.emit
     });
+    setCurrentInstance(null)
     handleSetupResult(instance, setupResult);
   }
 }
@@ -46,10 +47,18 @@ export function handleSetupResult(instance, setupResult){
   if( typeof setupResult === 'object'){
     instance.setupState = setupResult;
   }
-  finishComponent(instance);
+  finishComponentSetup(instance);
 }
 
-export function finishComponent(instance){
+export function finishComponentSetup(instance){
   const component = instance.type;
   instance.render = component.render;
+}
+
+export function getCurrentInstance(){
+  return currentInstance;
+}
+
+export function setCurrentInstance(instance){
+  currentInstance = instance;
 }

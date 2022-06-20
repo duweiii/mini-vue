@@ -1,7 +1,10 @@
-import { h, renderSlots } from "../lib/guide-mini-vue.esm.js"
+import { getCurrentInstance, h, renderSlots } from "../lib/guide-mini-vue.esm.js"
 
 export default {
+  name: 'Foo',
   setup(props, { emit }){
+    console.log( getCurrentInstance() )
+
     const handleClick = (e) => {
       e.stopPropagation();
       emit("add", 'this is a', 'this is b')
