@@ -4,13 +4,15 @@ import { initProps } from "./componentProps";
 import { initSlots } from "./componentSlots";
 import { publicComponentHandlers } from "./publicComponentHandlers";
 let currentInstance = null;
-export function createComponentInstance(vnode){
+export function createComponentInstance(vnode, parent){
   const instance = {
     vnode,
     type: vnode.type,
     el: null,
     setupState: {},
     props: null,
+    parent,
+    provides: parent ? parent.provides : {},
     emit: () => {},
   }
 

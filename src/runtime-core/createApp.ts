@@ -5,7 +5,7 @@ export function createApp( rootComponent ){
   return {
     mount(rootContainer){
       const vNode = createVNode(rootComponent);
-      render(vNode, rootContainer)
+      render(vNode, rootContainer, null)
     }
   }
 }
