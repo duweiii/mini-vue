@@ -4,7 +4,7 @@ import { createAppAPI } from "./createApp";
 import { Fragment, Text } from "./createVNode";
 
 export function createRenderer(options){
-  const {createElement, patchProp, insert} = options;
+  const {createElement: hostCreateElement, patchProp: hostPatchProp, insert: hostInsert} = options;
 
   function render(vnode, container, parent){
     patch(vnode, container, parent);
@@ -33,18 +33,18 @@ export function createRenderer(options){
   function processText(vnode, container){
     const { children } = vnode;
     const textNode = ( vnode.el = document.createTextNode( children ))
-    insert(textNode, container)
+    hostInsert(textNode, container)
   }
   function processElement(vnode, container, parent){
     mountElement(vnode, container, parent)
   }
   function mountElement(vnode, container, parent){
-    let el = ( vnode.el = createElement(vnode.type));
+    let el = ( vnode.el = hostCreateElement(vnode.type));
   
     const { props } = vnode;
     for (const attr in props) {
       const value = props[attr];
-      patchProp(el, attr, null, value)
+      hostPatchProp(el, attr, null, value)
     }
   
     const { children } = vnode;
@@ -53,7 +53,7 @@ export function createRenderer(options){
     }else if ( vnode.shapeFlag & EShapeFlags.ARRAY_CHILDREN ){
       mountChildren(children, el, parent)
     }
-    insert(el, container)
+    hostInsert(el, container)
   }
   function mountChildren(children, container, parent){
     children.forEach(child => patch(child, container, parent))
