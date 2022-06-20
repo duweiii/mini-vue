@@ -1,4 +1,4 @@
-import { h } from '../lib/guide-mini-vue.esm.js';
+import { createTextVNode, h } from '../lib/guide-mini-vue.esm.js';
 import Foo from './foo.js';
 export const App = {
   render(){
@@ -26,7 +26,8 @@ export const App = {
           header: () => h('p',{id: 'slot-id-p-header'}, '这是slot的具名插槽，且name为header'),
           footer: (info) => h('p',{id: 'slot-id-p-header'}, '这是slot的作用域插槽，且name为footer, 接受的参数为info: ' + info.name),
         }
-      )
+      ),
+      createTextVNode('这是vnode.children数组中的一个纯文本')
     ]
     )
   },

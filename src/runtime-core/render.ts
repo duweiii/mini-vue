@@ -1,19 +1,38 @@
 import { isObject } from "../shared/index";
 import { EShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { Fragment, Text } from "./createVNode";
 
 export function render(vnode, container){
   patch(vnode, container);
 }
 
 export function patch(vnode, container){
-  if(vnode.shapeFlag & EShapeFlags.ELEMENT){
-    processElement(vnode, container)
-  }else if ( vnode.shapeFlag & EShapeFlags.STATEFUL_COMPONENT ){
-    propcessComponent(vnode, container)
+  const { type } = vnode;
+  switch( type ){
+    case Fragment:
+      processFragment(vnode, container);
+      break;
+    case Text:
+      processText(vnode, container)
+      break;
+    default:
+      if(vnode.shapeFlag & EShapeFlags.ELEMENT){
+        processElement(vnode, container)
+      }else if ( vnode.shapeFlag & EShapeFlags.STATEFUL_COMPONENT ){
+        propcessComponent(vnode, container)
+      }
+      break;
   }
 }
-
+function processFragment(vnode, container){
+  mountChildren(vnode.children, container)
+}
+function processText(vnode, container){
+  const { children } = vnode;
+  const textNode = ( vnode.el = document.createTextNode( children ))
+  container.append(textNode)
+}
 function processElement(vnode, container){
   mountElement(vnode, container)
 }
