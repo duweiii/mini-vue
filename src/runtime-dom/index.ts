@@ -9,7 +9,11 @@ function patchProp(el, key, prevValue, nextValue){
     let eventType = key.slice(2).toLowerCase();
     el.addEventListener(eventType, nextValue);
   } else {
-    el.setAttribute(key, nextValue)
+    if( nextValue === undefined || nextValue === null ){
+      el.removeAttribute(key)
+    }else{
+      el.setAttribute(key, nextValue)
+    }
   }
 }
 function insert(el, parent){
