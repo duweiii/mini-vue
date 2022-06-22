@@ -16,8 +16,8 @@ function patchProp(el, key, prevValue, nextValue){
     }
   }
 }
-function insert(el, parent){
-  return parent.append(el)
+function insert(el, parent, anchor = null){
+  return parent.insertBefore(el, anchor)
 }
 function setElementText(el, text){
   el.textContent = text;
