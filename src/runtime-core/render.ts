@@ -6,7 +6,13 @@ import { createAppAPI } from "./createApp";
 import { Fragment, Text } from "./createVNode";
 
 export function createRenderer(options){
-  const {createElement: hostCreateElement, patchProp: hostPatchProp, insert: hostInsert} = options;
+  const {
+    createElement: hostCreateElement,
+    patchProp: hostPatchProp, 
+    insert: hostInsert,
+    setElementText: hostSetElementText,
+    remove: hostRemove
+  } = options;
 
   function render(vnode, container, parent){
     patch(null, vnode, container, parent);
@@ -51,6 +57,7 @@ export function createRenderer(options){
     const oldProps = n1.props || EMPTY_OBJECT;
     const newProps = n2.props || EMPTY_OBJECT;
     patchProps(el, oldProps, newProps)
+    patchChildren(n1, n2, container, parent);
   }
   function patchProps(el, oldProps, newProps) {
     if( oldProps !== newProps ){
@@ -71,6 +78,30 @@ export function createRenderer(options){
       }
       
     }
+  }
+  function patchChildren(n1, n2, container, parent){
+    const prevShapflag = n1.shapeFlag;
+    const shapeFlag = n2.shapeFlag;
+    const c1 = n1.children;
+    const c2 = n2.children;
+    const el = n1.el;
+    if( shapeFlag & EShapeFlags.TEXT_CHILDREN ){
+      if( prevShapflag & EShapeFlags.ARRAY_CHILDREN ){
+        unmountChildren(c1)
+        hostSetElementText(el, c2)
+      }else if( prevShapflag & EShapeFlags.TEXT_CHILDREN ){
+        hostSetElementText(el, c2)
+      }
+    }else if( shapeFlag & EShapeFlags.ARRAY_CHILDREN ){
+      if( prevShapflag & EShapeFlags.TEXT_CHILDREN ){
+        // 老的children是string，新的是array
+        hostSetElementText(el, '')
+        mountChildren(c2, el, parent)
+      }
+    }
+  }
+  function unmountChildren(children){
+    children.forEach( child => hostRemove(child.el))
   }
   function mountElement(vnode, container, parent){
     let el = ( vnode.el = hostCreateElement(vnode.type));
