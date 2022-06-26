@@ -1,3 +1,5 @@
+import { ENodeType } from "./ast";
+
 export function baseParse(content){
   let context = createContext(content);
   return createRoot( parseChildren(context) )
@@ -32,10 +34,10 @@ function parseInterpolation(context){
   let content = rawContent.trim()
   advanced(context, rawLength + closeDelimiter.length)
   return {
-    type: 'interpolation',
+    type: ENodeType.INTERPOLATION,
     content: {
-      type: 'simple_expression',
-      content: 'message'
+      type: ENodeType.SIMPLE_EXPRESSION,
+      content,
     }
   }
 }
