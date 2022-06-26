@@ -169,6 +169,8 @@ export function createRenderer(options){
        */
       let s1 = i;
       let s2 = i;
+      let patched = 0;
+      let toBePatched = e2 - s2 + 1;
       let newKeyToNewIndexMap = new Map();
       // 先创建一个newChildren中每一个child的key-index的字典，方便后续查找，降低时间复杂度
       for(let i = s2; i <= e2; i++) {
@@ -178,6 +180,10 @@ export function createRenderer(options){
 
       for( let i = s1; i <= e1; i++ ){
         let prevChild = c1[i];
+        if( patched >= toBePatched ){
+          hostRemove(prevChild.el)
+          continue;
+        }
         let newIndex;
         // 对当前的 prevChild，判断他是否也在newChildren中
         if( prevChild.key !== null ){
@@ -197,6 +203,7 @@ export function createRenderer(options){
           hostRemove(prevChild.el)
         }else{
           patch(prevChild, c2[newIndex], container, parent, anchor)
+          patched++;
         }
       }
     }
