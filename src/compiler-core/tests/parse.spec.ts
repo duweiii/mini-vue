@@ -25,4 +25,16 @@ describe('happy path', () => {
       })
     })
   })
+
+  describe("parse text" , () => {
+    it('parse', () => {
+      const str = 'some thing'
+      const ast = baseParse(str)
+      expect(ast.children[0]).toStrictEqual({
+        type: ENodeType.TEXT,
+        content: str
+      })
+    })
+  })
+
 })

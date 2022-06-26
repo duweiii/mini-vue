@@ -24,6 +24,11 @@ function parseChildren(context){
       node = parseElement( context )
     }
   }
+
+  if( !node ){
+    node = parseText(context)
+  }
+
   nodes.push(node)
   return nodes;
 }
@@ -39,22 +44,27 @@ function parseTag(context, type: EElementStatus){
   advanced(context, match[0].length)
   advanced(context, 1)
   if(type === EElementStatus.END) return ;
-
   return {
     type: ENodeType.ELEMENT,
     tag,
   }
 }
+function parseText(context){
+  let content = parseTextData(context, context.source.length)
+  return {
+    type: ENodeType.TEXT,
+    content,
+  }
+}
 function parseInterpolation(context){
   let openDelimiter = "{{"
   let closeDelimiter = "}}"
-  
   const closeIndex = context.source.indexOf(closeDelimiter, openDelimiter.length)
   advanced(context, openDelimiter.length)
   let rawLength = closeIndex - openDelimiter.length;
-  let rawContent = context.source.slice(0, rawLength)
+  let rawContent = parseTextData(context, rawLength)
   let content = rawContent.trim()
-  advanced(context, rawLength + closeDelimiter.length)
+  advanced(context, closeDelimiter.length)
   return {
     type: ENodeType.INTERPOLATION,
     content: {
@@ -62,6 +72,11 @@ function parseInterpolation(context){
       content,
     }
   }
+}
+function parseTextData(context, length){
+  let content = context.source.slice(0, length);
+  advanced(context, length)
+  return content;
 }
 function advanced(context, leng){
   context.source = context.source.slice(leng)
