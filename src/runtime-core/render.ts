@@ -4,6 +4,7 @@ import { EShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppAPI } from "./createApp";
 import { Fragment, Text } from "./createVNode";
+import { queueJobs } from "./schedulers";
 
 export function createRenderer(options){
   const {
@@ -340,7 +341,11 @@ export function createRenderer(options){
       }
     }
 
-    instance.update = effect(handleRender)
+    instance.update = effect(handleRender, {
+      scheduler: () => {
+        queueJobs( instance.update )
+      }
+    })
   }
 
   return {
