@@ -159,6 +159,46 @@ export function createRenderer(options){
         hostRemove(c1[i].el);
         i++;
       }
+    }else{
+      /**
+       * 这里就是 i < e1 && i < e2 的部分了。
+       * 对这部分，
+       * 1. 删除oldChildren里有，而newChildren中没有的vnod
+       * 2. 处理oldChildren&newChildren都有的且需要改变位置的vnode
+       * 3. 创建newChildren里有，而oldChildren中没有的vnode
+       */
+      let s1 = i;
+      let s2 = i;
+      let newKeyToNewIndexMap = new Map();
+      // 先创建一个newChildren中每一个child的key-index的字典，方便后续查找，降低时间复杂度
+      for(let i = s2; i <= e2; i++) {
+        let nextChild = c2[i];
+        newKeyToNewIndexMap.set(nextChild.key, i);
+      }
+
+      for( let i = s1; i <= e1; i++ ){
+        let prevChild = c1[i];
+        let newIndex;
+        // 对当前的 prevChild，判断他是否也在newChildren中
+        if( prevChild.key !== null ){
+            newIndex = newKeyToNewIndexMap.get( prevChild.key )
+        }else{
+          for( let j = s2; j <= e2; j++){
+            let nextChild = c2[j];
+            if( isSameVNodeType(prevChild, nextChild) ){
+              newIndex = j;
+              break;
+            }
+          }
+        }
+        // 根据newIndex做处理
+        if( newIndex === undefined ){
+          // 删除
+          hostRemove(prevChild.el)
+        }else{
+          patch(prevChild, c2[newIndex], container, parent, anchor)
+        }
+      }
     }
 
 
