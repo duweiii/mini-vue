@@ -1,19 +1,28 @@
+import { ENodeType } from "../src/ast"
 import { baseParse } from "../src/parse"
 
 describe('happy path', () => { 
-  
-  describe('parse', () => { 
+  describe('parse mustache', () => { 
     it('parse', ()=>{
       const str = '{{message}}'
       const ast = baseParse(str)
       expect(ast.children[0]).toStrictEqual({
-        type: 'interpolation',
+        type: ENodeType.INTERPOLATION,
         content: {
-          type: 'simple_expression',
+          type: ENodeType.SIMPLE_EXPRESSION,
           content: 'message'
         }
       })
     })
   })
-
+  describe("parse element" , () => {
+    it('parse', () => {
+      const str = '<div></div>'
+      const ast = baseParse(str)
+      expect(ast.children[0]).toStrictEqual({
+        type: ENodeType.ELEMENT,
+        tag: 'div'
+      })
+    })
+  })
 })
