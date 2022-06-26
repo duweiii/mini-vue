@@ -71,6 +71,26 @@ import { h, ref } from '../../lib/guide-mini-vue.esm.js';
 // ]
 
 // 改变顺序
+// const oldChildren = [ 
+//   h('div', { key: "A" }, "A"),
+//   h('div', { key: "B" }, "B"),
+//   h('div', { key: "C" }, "C"),
+//   h('div', { key: "D" }, "D"),
+//   h('div', { key: "E" }, "E"),
+//   h('div', { key: "F" }, "F"),
+//   h('div', { key: "G" }, "G"),
+// ]
+// const newChildren = [
+//   h('div', { key: "A" }, "A"),
+//   h('div', { key: "B" }, "B"),
+//   h('div', { key: "E" }, "E"),
+//   h('div', { key: "C" }, "C"),
+//   h('div', { key: "D" }, "D"),
+//   h('div', { key: "F" }, "F"),
+//   h('div', { key: "G" }, "G"),
+// ]
+
+// 添加元素
 const oldChildren = [ 
   h('div', { key: "A" }, "A"),
   h('div', { key: "B" }, "B"),
@@ -84,6 +104,7 @@ const newChildren = [
   h('div', { key: "A" }, "A"),
   h('div', { key: "B" }, "B"),
   h('div', { key: "E" }, "E"),
+  h('div', { key: "H" }, "H"),
   h('div', { key: "C" }, "C"),
   h('div', { key: "D" }, "D"),
   h('div', { key: "F" }, "F"),
