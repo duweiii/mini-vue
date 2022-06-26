@@ -103,8 +103,6 @@ export function createRenderer(options){
     let e1 = c1.length-1;
     let e2 = c2.length-1;
     let i = 0;
-    console.log(c1)
-    console.log(c2)
     // 1. 双端对比，确定变化范围
     
     // 向右对比
@@ -286,15 +284,41 @@ export function createRenderer(options){
     children.forEach(child => patch(null, child, container, parent, null))
   }
   function propcessComponent(n1, n2, container, parent){
-    mountComponent(n2, container, parent);
+    if( !n1 ){
+      mountComponent(n2, container, parent);
+    }else{
+      updateComponent(n1, n2, container, parent);
+    }
   }
   function mountComponent(n2, container, parent){
-    const instance = createComponentInstance(n2, parent);
+    const instance = n2.component = createComponentInstance(n2, parent);
     setupComponent(instance);
     setupRenderEffect(instance, container);
   }
+  function updateComponent(n1, n2, container, parent){
+    const instance = n2.component = n1.component;
+    if( shouldComponentUpdate(n1, n2) ){
+      instance.next = n2;
+      instance.update()
+    }else{
+      n2.el = n1.el;
+      instance.vnode = n2;
+    }
+  }
+  function shouldComponentUpdate(n1, n2){
+    const { props: prevProps } = n1;
+    const { props: nextProps } = n2;
+    for (const key in prevProps) {
+      let prevValue = prevProps[key]
+      let nextValue = nextProps[key]
+      if ( prevValue !== nextValue ) {
+        return true;
+      }
+    }
+    return false;
+  }
   function setupRenderEffect(instance, container){
-    effect(()=>{
+    function handleRender(){
       if( !instance.isMounted ){
         const { proxy } = instance;
         const subTree = instance.render.call(proxy);
@@ -304,17 +328,29 @@ export function createRenderer(options){
         instance.isMounted = true;
       }else{
         const { proxy } = instance;
+        const { next, vnode } = instance;
+        if( next ){
+          next.el = vnode.el;
+          transformProps(instance, next)
+        }
         const newTree = instance.render.call(proxy);
         const oldTree = instance.subTree;
         instance.subTree = newTree;
         patch(oldTree, newTree, container, instance, null );
       }
-    })
+    }
+
+    instance.update = effect(handleRender)
   }
 
   return {
     createApp: createAppAPI(render)
   }
+}
+function transformProps(instance, nextVNode){
+  instance.props = nextVNode.props;
+  instance.vnode = nextVNode;
+  instance.next = null;
 }
 
 function getSequence(arr: number[]): number[] {
