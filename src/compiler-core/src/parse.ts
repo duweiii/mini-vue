@@ -60,12 +60,39 @@ function parseElement(context, ancestor){
   ancestor.push( element.tag )
   element.children = parseChildren(context, ancestor)
   ancestor.pop()
-  if( startsWithCloseTagAndIsSameTag(context, element.tag) ){
+  if( startsWithCloseTagAndIsSameTag(context, element.tag) && !loseEndTag(context, ancestor, element.tag) ){
+    // 还有 <div> <div> </div> 这种情况需要处理
+    // 这时，ancestor栈中的div数量应该比context.source中少一个
+    // 所以当 ancestor>div's count === context.source中div的数量-1时，标签才是正常的
+
+    /**
+     * 上面说的情况现在的判断也可以捕获到缺少标签。
+     * <div><span></div>
+     * 这种情况，因为span跟后面的div不匹配，所以肯定不会命中这个if，所以走到else中
+     * <div><div></div>
+     * 这种情况，中间的div调用startsWithCloseTagAndIsSameTag这个判断，结果为true，
+     * 会把后面的父元素的结束标签删掉，
+     * 然后父元素在最后需要处理结束标签时，因为 context.source 已经为空字符串了，
+     * 所以肯定不会等于element.tag，也会进入else的逻辑报错。
+     * 
+     * 所以最后的问题就是，进入错误逻辑的本该是子div元素，现在是父div元素。错误定位不准确。
+     * 
+     * 添加判断 !loseEndTag(context, ancestor, element.tag)
+     */
     parseTag( context, EElementStatus.END)
   }else{
     throw new Error(`缺少结束标签${element.tag}`);
   }
   return element;
+}
+function loseEndTag(context, ancestor, tag){
+  const duplicateString = context.source;
+  const endTagCountInSourceString = duplicateString.split(tag).length - 1;
+  let tagCountInAncestor = 0;
+  ancestor.forEach(item => {
+    item === tag && tagCountInAncestor++;
+  })
+  return tagCountInAncestor + 1 !== endTagCountInSourceString;
 }
 function parseTag(context, type: EElementStatus){
   let match: any = /^<\/?([a-z]*)/i.exec( context.source );

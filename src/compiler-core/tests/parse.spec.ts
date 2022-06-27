@@ -62,4 +62,18 @@ describe('happy path', () => {
     })
    })
 
+   describe('lose end tag', () => { 
+    it('lose tag span', ()=>{
+      expect(()=>{
+        baseParse('<div><span></div>')
+      }).toThrow("缺少结束标签span")
+    })
+
+    it('lose tag div', ()=>{
+      expect(()=>{
+        baseParse('<div><div></div>')
+      }).toThrow("缺少结束标签div")
+    })
+  })
+
 })
