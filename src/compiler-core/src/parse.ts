@@ -87,7 +87,7 @@ function parseElement(context, ancestor){
 }
 function loseEndTag(context, ancestor, tag){
   const duplicateString = context.source;
-  const endTagCountInSourceString = duplicateString.split(tag).length - 1;
+  const endTagCountInSourceString = duplicateString.split(`</${tag}>`).length - 1;
   let tagCountInAncestor = 0;
   ancestor.forEach(item => {
     item === tag && tagCountInAncestor++;
