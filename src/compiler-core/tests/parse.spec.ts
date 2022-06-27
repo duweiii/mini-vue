@@ -21,7 +21,8 @@ describe('happy path', () => {
       const ast = baseParse(str)
       expect(ast.children[0]).toStrictEqual({
         type: ENodeType.ELEMENT,
-        tag: 'div'
+        tag: 'div',
+        children: []
       })
     })
   })
@@ -36,5 +37,29 @@ describe('happy path', () => {
       })
     })
   })
+
+  describe('parse three type', () => { 
+    it("three type", ()=>{
+      const str = '<div>hi,{{message}}</div>'
+      const ast = baseParse(str)
+      expect(ast.children[0]).toStrictEqual({
+        type: ENodeType.ELEMENT,
+        tag: 'div',
+        children: [
+          {
+            type: ENodeType.TEXT,
+            content: "hi,"
+          },
+          {
+            type: ENodeType.INTERPOLATION,
+            content: {
+              type: ENodeType.SIMPLE_EXPRESSION,
+              content: 'message'
+            }
+          }
+        ]
+      })
+    })
+   })
 
 })

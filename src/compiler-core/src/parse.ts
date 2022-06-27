@@ -2,7 +2,7 @@ import { EElementStatus, ENodeType } from "./ast";
 
 export function baseParse(content){
   let context = createContext(content);
-  return createRoot( parseChildren(context) )
+  return createRoot( parseChildren(context, []) )
 }
 function createRoot(children){
   return {
@@ -14,28 +14,57 @@ function createContext(content){
     source: content
   }
 }
-function parseChildren(context){
+function parseChildren(context, ancestor){
   let nodes: any = [];
   let node;
-  if( context.source.startsWith("{{")){
-    node = parseInterpolation(context)
-  }else if( context.source[0] === '<' ){
-    if( /[a-z]/i.test( context.source[1] ) ){
-      node = parseElement( context )
+  while( !isEnd(context, ancestor) ){
+    if( context.source.startsWith("{{")){
+      node = parseInterpolation(context)
+    }else if( context.source[0] === '<' ){
+      if( /[a-z]/i.test( context.source[1] ) ){
+        node = parseElement( context , ancestor)
+      }
+    }
+  
+    if( !node ){
+      node = parseText(context)
+    }
+  
+    nodes.push(node)
+  }
+  return nodes;
+}
+function isEnd(context, ancestor){
+  /**
+   * 结束的条件
+   * 1. context.source 为空
+   * 2. 遇到结束标签了
+   */
+  let s = context.source;
+  if( s.startsWith("</") ){
+    for( let i = ancestor.length - 1; i >= 0 ; i-- ){
+      let tag = ancestor[i];
+      if( startsWithCloseTagAndIsSameTag(context, tag) ){
+        return true;
+      }
     }
   }
 
-  if( !node ){
-    node = parseText(context)
-  }
-
-  nodes.push(node)
-  return nodes;
+  return !s;
 }
-function parseElement(context){
-  let element = parseTag( context, EElementStatus.START)
-
-  parseTag( context, EElementStatus.END)
+function startsWithCloseTagAndIsSameTag(context, tag){
+  return context.source.startsWith("</") && tag.toLowerCase() === context.source.slice(2, 2 + tag.length).toLowerCase();
+}
+function parseElement(context, ancestor){
+  let element: any = parseTag( context, EElementStatus.START)
+  ancestor.push( element.tag )
+  element.children = parseChildren(context, ancestor)
+  ancestor.pop()
+  if( startsWithCloseTagAndIsSameTag(context, element.tag) ){
+    parseTag( context, EElementStatus.END)
+  }else{
+    throw new Error(`缺少结束标签${element.tag}`);
+  }
   return element;
 }
 function parseTag(context, type: EElementStatus){
@@ -50,7 +79,16 @@ function parseTag(context, type: EElementStatus){
   }
 }
 function parseText(context){
-  let content = parseTextData(context, context.source.length)
+  let endIndex = context.source.length;
+  let endSymbol = ["<","{{"]
+
+  endSymbol.forEach((item) => {
+    let index = context.source.indexOf(item);
+    if( index !== -1 && index < endIndex){
+      endIndex = index;
+    }
+  })
+  let content = parseTextData(context, endIndex)
   return {
     type: ENodeType.TEXT,
     content,
