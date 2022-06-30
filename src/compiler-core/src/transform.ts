@@ -16,8 +16,8 @@ function traverseNode(node, context){
 
   const { nodeTransforms } = context;
   for( let i = 0; i < nodeTransforms.length; i++ ){
-    const transf = nodeTransforms[i];
-    transf(node)
+    const transform = nodeTransforms[i];
+    transform(node)
   }
 
   traverseChildren( node, context );
