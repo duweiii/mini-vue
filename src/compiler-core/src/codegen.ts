@@ -1,3 +1,4 @@
+import { isString } from "../../shared/index";
 import { ENodeType } from "./ast";
 import { CREATE_ELEMENT_VNODE, helperMap, TO_DISPLAY_STRING } from "./runtimeHelpers";
 
@@ -58,14 +59,53 @@ function genNode(node, context){
       break;
     case ENodeType.ELEMENT:
       genElement(node, context);
+      break;
+    case ENodeType.COMPOUND_EXPRESSION:
+      genCompoundExpression(node, context);
+      break;
     default:
       break;
   }
 }
 
+function genCompoundExpression(node, context){
+  const { children } = node;
+  const { push } = context;
+  for (let i = 0; i < children.length; i++) {
+    let child = children[i];
+    if( isString(child) ){
+      push(child);
+    }else{
+      genNode(child, context)
+    }
+  }
+}
+
 function genElement(node, context){
   const { helper, push } = context;
-  push(`${helper(CREATE_ELEMENT_VNODE)}('div')`)
+  const { tag, props, children } = node;
+  push(`${helper(CREATE_ELEMENT_VNODE)}(`)
+  genNodeList( genNullable([tag, props, children]), context );
+  push(")")
+}
+
+function genNullable(args){
+  return args.map(arg => arg || 'null');
+}
+
+function genNodeList(nodes, context){
+  const { push } = context;
+  for (let index = 0; index < nodes.length; index++) {
+    const node = nodes[index];
+    if( isString(node) ){
+      push(node);
+    }else{
+      genNode(node, context);
+    }
+    if( index < nodes.length - 1 ){
+      push(', ')
+    }
+  }
 }
 
 function genText(node, context){

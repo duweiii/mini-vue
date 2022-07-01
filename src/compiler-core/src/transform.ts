@@ -11,7 +11,12 @@ function createHelpers(root, context){
   root.helpers = [...context.helpers.keys()];
 }
 function createCodegenNode( root ){
-  root.codegenNode = root.children[0]
+  const child = root.children[0];
+  if( child.type === ENodeType.ELEMENT ){
+    root.codegenNode = child.codegenNode;
+  }else{
+    root.codegenNode = root.children[0]
+  }
 }
 function createTransformContext(root, options){
   const context = {
@@ -28,9 +33,12 @@ function createTransformContext(root, options){
 function traverseNode(node, context){
 
   const { nodeTransforms } = context;
+  let exitFns: any = [];
+
   for( let i = 0; i < nodeTransforms.length; i++ ){
     const transform = nodeTransforms[i];
-    transform(node, context)
+    const cb = transform(node, context)
+    cb && exitFns.push(cb);
   }
 
   switch(node.type){
@@ -40,6 +48,13 @@ function traverseNode(node, context){
       break;
     case ENodeType.INTERPOLATION:
       context.helper(TO_DISPLAY_STRING)
+    default: 
+      break;
+  }
+
+  let i = exitFns.length;
+  while(i--){
+    exitFns[i] && exitFns[i]();
   }
 }
 
