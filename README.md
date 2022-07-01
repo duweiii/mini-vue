@@ -1,2 +1,2 @@
 # mini-vue
- mini-vue3; vue-source; learn;
+ 学习 Vue3 源码，实现简易版 Vue 模型
