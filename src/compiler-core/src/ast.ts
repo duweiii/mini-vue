@@ -2,7 +2,8 @@ export const enum ENodeType {
   INTERPOLATION = 'interpolation',
   SIMPLE_EXPRESSION = 'simple_expression',
   ELEMENT = 'element',
-  TEXT = 'text'
+  TEXT = 'text',
+  ROOT = 'root'
 }
 
 export const enum EElementStatus {

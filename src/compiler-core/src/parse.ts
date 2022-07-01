@@ -6,6 +6,7 @@ export function baseParse(content){
 }
 function createRoot(children){
   return {
+    type: ENodeType.ROOT,
     children
   }
 }
