@@ -6,3 +6,8 @@ exports[`code generate happy path 2`] = `
 "const { toDisplayString:_toDisplayString } = Vue
 return function render(_ctx,_cache){return _toDisplayString(_ctx.message)}"
 `;
+
+exports[`code generate happy path 3`] = `
+"const { createElementVNode:_createElementVNode } = Vue
+return function render(_ctx,_cache){return _createElementVNode('div')}"
+`;

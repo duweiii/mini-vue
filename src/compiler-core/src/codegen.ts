@@ -1,5 +1,5 @@
 import { ENodeType } from "./ast";
-import { helperMap, TO_DISPLAY_STRING } from "./runtimeHelpers";
+import { CREATE_ELEMENT_VNODE, helperMap, TO_DISPLAY_STRING } from "./runtimeHelpers";
 
 export function generate(node){
   const context = createCodegenContext()
@@ -56,7 +56,16 @@ function genNode(node, context){
     case ENodeType.SIMPLE_EXPRESSION:
       genExpression(node, context)
       break;
+    case ENodeType.ELEMENT:
+      genElement(node, context);
+    default:
+      break;
   }
+}
+
+function genElement(node, context){
+  const { helper, push } = context;
+  push(`${helper(CREATE_ELEMENT_VNODE)}('div')`)
 }
 
 function genText(node, context){
