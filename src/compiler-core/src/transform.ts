@@ -45,10 +45,8 @@ function traverseNode(node, context){
 
 function traverseChildren( node, context ){
   const { children } = node;
-  if( children ){
-    for( let i = 0; i < children.length ; i++ ){
-      const node = children[i]
-      traverseNode( node, context)
-    }
+  for( let i = 0; i < children.length ; i++ ){
+    const node = children[i]
+    traverseNode( node, context)
   }
 }
