@@ -98,7 +98,6 @@ export function createRenderer(options){
     const shapeFlag = n2.shapeFlag;
     const c1 = n1.children;
     const c2 = n2.children;
-    console.log( n1, n2)
     if( shapeFlag & EShapeFlags.TEXT_CHILDREN ){
       if( prevShapflag & EShapeFlags.ARRAY_CHILDREN ){
         unmountChildren(c1)

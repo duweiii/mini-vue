@@ -1,8 +1,8 @@
-import { createVNodeCall, ENodeType } from "../ast";
 import { CREATE_ELEMENT_VNODE } from "../runtimeHelpers";
+import { isElement } from "../utils";
 
 export function transformElement(node, context){
-  if( node.type === ENodeType.ELEMENT ){
+  if( isElement(node) ){
     return () => {
       context.helper(CREATE_ELEMENT_VNODE)
 

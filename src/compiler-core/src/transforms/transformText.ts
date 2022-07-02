@@ -1,8 +1,8 @@
 import { ENodeType } from "../ast";
-import { isText } from "../utils";
+import { isElement, isText } from "../utils";
 
 export function transformText(node){
-  if( node.type === ENodeType.ELEMENT){
+  if( isElement(node) ){
     return () => {
       const { children } = node;
       let currentContainer;

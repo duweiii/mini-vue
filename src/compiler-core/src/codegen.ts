@@ -85,34 +85,30 @@ function genCompoundExpression(node, context){
 
 function genElement(node, context){
   const { helper, push } = context;
-  const { tag, props, children } = node;
+  const { tag, props } = node;
   push(`${helper(CREATE_ELEMENT_VNODE)}(`)
   genNodeList( genNullable([tag, props]), context );
-  genChildren(node, context);
+  genElementChildren(node, context);
   push(")")
 }
 
-function genChildren(node, context){
+function genElementChildren(node, context){
   const { children } = node;
   const { push } = context;
   if( children ){
     push(', ')
   }
-  if(Array.isArray( children )){
-    const { addArrayWrapper } = node;
-    addArrayWrapper && push('[');
-    const length = children.length;
-    for (let i = 0; i < length; i++) {
-      const child = children[i];
-      genNode(child, context);
-      if( i < length -1 ){
-        push(', ')
-      }
+  const { addArrayWrapper } = node;
+  addArrayWrapper && push('[');
+  const length = children.length;
+  for (let i = 0; i < length; i++) {
+    const child = children[i];
+    genNode(child, context);
+    if( i < length -1 ){
+      push(', ')
     }
-    addArrayWrapper && push(']');
   }
-
-
+  addArrayWrapper && push(']');
 }
 function genNullable(args){
   return args.map(arg => arg || 'null');
@@ -154,6 +150,6 @@ function textNodeWrapper(node, context, fn){
   const { addTextWrapper } = node;
   const { push, helper } = context;
   addTextWrapper && push(`${helper(CREATE_TEXT_VNODE)}(`)
-  fn(node, context);
+  fn();
   addTextWrapper && push(')')
 }
