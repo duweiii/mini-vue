@@ -1,3 +1,4 @@
+export * from '../runtime-core/index';
 import { createRenderer } from "../index";
 
 function createElement(type: string){
@@ -40,5 +41,3 @@ const renderer: any = createRenderer({
 export function createApp(...args){
   return renderer.createApp(...args)
 }
-
-export * from '../runtime-core/index';
