@@ -1,6 +1,6 @@
 import { isString } from "../../shared/index";
 import { ENodeType } from "./ast";
-import { CREATE_ELEMENT_VNODE, helperMap, TO_DISPLAY_STRING } from "./runtimeHelpers";
+import { CREATE_ELEMENT_VNODE, CREATE_TEXT_VNODE, helperMap, TO_DISPLAY_STRING } from "./runtimeHelpers";
 
 export function generate(node){
   const context = createCodegenContext()
@@ -69,26 +69,51 @@ function genNode(node, context){
 }
 
 function genCompoundExpression(node, context){
-  const { children } = node;
-  const { push } = context;
-  for (let i = 0; i < children.length; i++) {
-    let child = children[i];
-    if( isString(child) ){
-      push(child);
-    }else{
-      genNode(child, context)
+  textNodeWrapper(node, context, () => {
+    const { children } = node;
+    const { push } = context;
+    for (let i = 0; i < children.length; i++) {
+      let child = children[i];
+      if( isString(child) ){
+        push(child);
+      }else{
+        genNode(child, context)
+      }
     }
-  }
+  })
 }
 
 function genElement(node, context){
   const { helper, push } = context;
   const { tag, props, children } = node;
   push(`${helper(CREATE_ELEMENT_VNODE)}(`)
-  genNodeList( genNullable([tag, props, children]), context );
+  genNodeList( genNullable([tag, props]), context );
+  genChildren(node, context);
   push(")")
 }
 
+function genChildren(node, context){
+  const { children } = node;
+  const { push } = context;
+  if( children ){
+    push(', ')
+  }
+  if(Array.isArray( children )){
+    const { addArrayWrapper } = node;
+    addArrayWrapper && push('[');
+    const length = children.length;
+    for (let i = 0; i < length; i++) {
+      const child = children[i];
+      genNode(child, context);
+      if( i < length -1 ){
+        push(', ')
+      }
+    }
+    addArrayWrapper && push(']');
+  }
+
+
+}
 function genNullable(args){
   return args.map(arg => arg || 'null');
 }
@@ -96,12 +121,8 @@ function genNullable(args){
 function genNodeList(nodes, context){
   const { push } = context;
   for (let index = 0; index < nodes.length; index++) {
-    const node = nodes[index];
-    if( isString(node) ){
-      push(node);
-    }else{
-      genNode(node, context);
-    }
+    const node: any = nodes[index];
+    push(node);
     if( index < nodes.length - 1 ){
       push(', ')
     }
@@ -109,18 +130,30 @@ function genNodeList(nodes, context){
 }
 
 function genText(node, context){
-  const { push } = context;
-  push(`'${node.content}'`);
+  textNodeWrapper(node, context, () => {
+    const { push } = context;
+    push(`'${node.content}'`);
+  } )
 }
 
 function genInterpolation(node, context){
-  const { push, helper } = context;
-  push(`${helper(TO_DISPLAY_STRING)}(`);
-  genNode( node.content, context )
-  push(')')
+  textNodeWrapper(node, context, () => {
+    const { push, helper } = context;
+    push(`${helper(TO_DISPLAY_STRING)}(`);
+    genNode( node.content, context )
+    push(')')
+  })
 }
 
 function genExpression(node, context){
   const { push } = context;
   push( node.content )
+}
+
+function textNodeWrapper(node, context, fn){
+  const { addTextWrapper } = node;
+  const { push, helper } = context;
+  addTextWrapper && push(`${helper(CREATE_TEXT_VNODE)}(`)
+  fn(node, context);
+  addTextWrapper && push(')')
 }

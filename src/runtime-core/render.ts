@@ -40,10 +40,25 @@ export function createRenderer(options){
     mountChildren(n2.children, container, parent)
   }
   function processText(n1, n2, container){
+    if( !n1 ){
+      mountText(n1, n2, container);
+    }else{
+      updateText(n1, n2, container);
+    }
+  }
+
+  function mountText(n1, n2, container){
     const { children } = n2;
     const textNode = ( n2.el = document.createTextNode( children ))
     hostInsert(textNode, container)
   }
+
+  function updateText(n1, n2, container){
+    const el = n2.el = n1.el;
+    const text = n2.children;
+    hostSetElementText(el, text)
+  }
+
   function processElement(n1, n2, container, parent, anchor){
     if( !n1 ){
       mountElement(n2, container, parent, anchor)
@@ -83,6 +98,7 @@ export function createRenderer(options){
     const shapeFlag = n2.shapeFlag;
     const c1 = n1.children;
     const c2 = n2.children;
+    console.log( n1, n2)
     if( shapeFlag & EShapeFlags.TEXT_CHILDREN ){
       if( prevShapflag & EShapeFlags.ARRAY_CHILDREN ){
         unmountChildren(c1)

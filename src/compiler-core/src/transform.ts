@@ -11,12 +11,7 @@ function createHelpers(root, context){
   root.helpers = [...context.helpers.keys()];
 }
 function createCodegenNode( root ){
-  const child = root.children[0];
-  if( child.type === ENodeType.ELEMENT ){
-    root.codegenNode = child.codegenNode;
-  }else{
-    root.codegenNode = root.children[0]
-  }
+  root.codegenNode = root.children[0]
 }
 function createTransformContext(root, options){
   const context = {

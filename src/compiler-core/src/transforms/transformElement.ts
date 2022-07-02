@@ -10,9 +10,11 @@ export function transformElement(node, context){
 
       let vnodeProps;
 
-      const vnodeChildren = node.children[0];
+      // const vnodeChildren = node.children[0];
 
-      node.codegenNode = createVNodeCall(vnodeTag, vnodeProps, vnodeChildren);
+      // node.codegenNode = createVNodeCall(vnodeTag, vnodeProps, vnodeChildren);
+      node.tag = vnodeTag;
+      node.props = vnodeProps;
     }
   }
 }

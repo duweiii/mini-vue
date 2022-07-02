@@ -5,6 +5,11 @@ exports[`code generate happy path: interpolation node 1`] = `
 return function render(_ctx,_cache){return _toDisplayString(_ctx.message)}"
 `;
 
+exports[`code generate happy path: multiple element 1`] = `
+"const { toDisplayString:_toDisplayString,createElementVNode:_createElementVNode } = Vue
+return function render(_ctx,_cache){return _createElementVNode('div', null, 'hi,' + _toDisplayString(_ctx.message)_createElementVNode('p', null, 'embed-element'))}"
+`;
+
 exports[`code generate happy path: text node 1`] = `"return function render(_ctx,_cache){return 'hi'}"`;
 
 exports[`code generate happy path: unit 1`] = `
@@ -14,5 +19,5 @@ return function render(_ctx,_cache){return _createElementVNode('div', null, 'hi,
 
 exports[`code generate happy path：element node 1`] = `
 "const { createElementVNode:_createElementVNode } = Vue
-return function render(_ctx,_cache){return _createElementVNode('div', null, null)}"
+return function render(_ctx,_cache){return _createElementVNode('div', null, 'ni')}"
 `;
