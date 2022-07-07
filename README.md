@@ -86,6 +86,7 @@
 - [x] generate
   - [x] genText
   - [x] genElement
+  - [x] genElementChildren
   - [x] genInterpolation
   - [x] genSimpleExpression
   - [x] genCompoundExpression
