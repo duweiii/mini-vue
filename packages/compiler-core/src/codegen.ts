@@ -1,4 +1,3 @@
-import { isString } from "@guide-mini-vue/shared";
 import { ENodeType } from "./ast";
 import { CREATE_ELEMENT_VNODE, CREATE_TEXT_VNODE, helperMap, TO_DISPLAY_STRING } from "./runtimeHelpers";
 
@@ -74,7 +73,7 @@ function genCompoundExpression(node, context){
     const { push } = context;
     for (let i = 0; i < children.length; i++) {
       let child = children[i];
-      if( isString(child) ){
+      if( typeof child === 'string' ){
         push(child);
       }else{
         genNode(child, context)
