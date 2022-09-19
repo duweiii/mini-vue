@@ -5,9 +5,9 @@ export default defineConfig({
         globals: true
     },
     resolve: {
-        // alias: {
-        //     find: '@guide-mini-vue\/(\w+)/',
-        //     replacement: path.resolve( __dirname, 'packages') + '/$1/src'
-        // }
+        alias: {
+            find: '@guide-mini-vue\/(\w+)/',
+            replacement: path.resolve( __dirname, 'packages') + '/$1/src'
+        }
     }
 })

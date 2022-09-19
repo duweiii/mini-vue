@@ -104,9 +104,9 @@
         "packages/*/src"
       ]
     },
-    "include": [
-      "packages/*/src",
-      "packages/*/__test__"
-    ]
-  }
+  },
+  "include": [
+    "packages/*/src",
+    "packages/*/__test__"
+  ]
 }

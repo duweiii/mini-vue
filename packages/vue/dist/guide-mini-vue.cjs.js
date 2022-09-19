@@ -140,9 +140,7 @@ function track(target, key) {
 function trackEffect(dep) {
     if (dep.has(activeEffect))
         return;
-    // 通过 target key 找到对应的依赖容器，收集依赖
     dep.add(activeEffect);
-    // 反向收集，标注当前的类，存在于哪些集合中
     activeEffect.deps.push(dep);
 }
 function isTracking() {
@@ -157,8 +155,6 @@ function trigger(target, key) {
 }
 function triggerEffect(dep) {
     for (const effect of dep) {
-        // 这里是为了处理只使用reactive 但不使用effect的情况下
-        // 触发get进行依赖收集时，收集到的是个undefined，因为没有effect配合暴露依赖
         if (effect === null || effect === void 0 ? void 0 : effect.scheduler) {
             effect.scheduler();
         }
@@ -183,10 +179,10 @@ const shallowReadonlyGet = createGetters(true, true);
 function createGetters(isReadonly = false, shallowReadonly = false) {
     return function get(target, key) {
         let res = Reflect.get(target, key);
-        if (key === "__v_isReactive" /* ERactiveFlags.isReactive */) {
+        if (key === "__v_isReactive") {
             return !isReadonly;
         }
-        else if (key === "__v_isReadonlu" /* ERactiveFlags.isReadonly */) {
+        else if (key === "__v_isReadonlu") {
             return isReadonly;
         }
         if (!isReadonly) {
@@ -225,6 +221,11 @@ const shallowReadonlyHandlers = Object.assign({}, readonlyHandlers, {
     get: shallowReadonlyGet,
 });
 
+var ERactiveFlags;
+(function (ERactiveFlags) {
+    ERactiveFlags["isReactive"] = "__v_isReactive";
+    ERactiveFlags["isReadonly"] = "__v_isReadonlu";
+})(ERactiveFlags || (ERactiveFlags = {}));
 function reactive(obj) {
     return createActiveObject(obj, reactiveHandlers);
 }
@@ -238,11 +239,11 @@ function isProxy(value) {
     return isReactive(value) || isReadonly(value);
 }
 function isReactive(obj) {
-    let res = obj["__v_isReactive" /* ERactiveFlags.isReactive */];
+    let res = obj["__v_isReactive"];
     return !!res;
 }
 function isReadonly(obj) {
-    let res = obj["__v_isReadonlu" /* ERactiveFlags.isReadonly */];
+    let res = obj["__v_isReadonlu"];
     return !!res;
 }
 function createActiveObject(raw, handlers) {
@@ -292,19 +293,6 @@ function proxyRefs(raw) {
             return unRef(res);
         },
         set(target, key, value) {
-            /**
-             * 这里为什么需要进行双重判断 ？
-             * 既要target[key]是 ref, 也要value 不是 ref
-             * - - - - - - - - - - -
-             * 因为如果 target[key] 是ref，且value也是ref，就会出现 ref.value 还是 ref 的情况
-             * 这显然与我们在定义 Ref 时定义的不一样。
-             * ref.value 要么是一个原始值，要么是一个对象。而是一个对象的话，也是用reactive处理过后返回的proxy对象
-             * 所以只有当 target[key] 是 ref，而 value 不是 ref 时，执行target[key].value = value;
-             * 后续不管这个value是原始值，还是对象，都会在Ref的set中被做对应处理。
-             * 而在其他情况中，
-             *  1. target[key]不是一个ref，那就正常给对象的key赋值；
-             *  2. 或者target[key]跟value都是ref，那就用新的ref覆盖旧的ref
-             */
             if (isRef(target[key]) && !isRef(value)) {
                 return target[key].value = value;
             }
@@ -324,14 +312,10 @@ function emit(instance, event, ...args) {
 }
 
 function initProps(instance, props) {
-    // 如果instance.props为undefined
-    // 那在调用 setup 时，进行 shallowReadonly 处理就会报错。
-    // 所以在这对undefined做兼容处理
     instance.props = props || {};
 }
 
 function initSlots(instance, children) {
-    // 并不是所有的组件实例都需要initSlots
     const { vnode } = instance;
     if (vnode.shapeFlag & exports.EShapeFlags.SLOT_CHILDREN) {
         normalizeSlotObject(instance, children);
@@ -357,15 +341,12 @@ const publicPropertiesMap = {
 const publicComponentHandlers = {
     get({ _: instance }, key) {
         const { setupState, props } = instance;
-        // 如果要去取的值在setupState上，直接返回
-        // if( key in setupState){
         if (hasOwn(setupState, key)) {
             return setupState[key];
         }
         else if (hasOwn(props, key)) {
             return props[key];
         }
-        // 但如果没再setupState中publicPropertiesMap
         const publicGetter = publicPropertiesMap[key];
         if (publicGetter) {
             return publicGetter(instance);
@@ -402,9 +383,6 @@ function setupStateFulComponent(instance) {
     const setup = component.setup;
     let setupResult;
     if (setup) {
-        // const setupContext = createSetupContext(instance);
-        // const setupReadonlyProps = shallowReadonly(instance.props)
-        // setupResult = setup(setupReadonlyProps, setupContext);
         setCurrentInstance(instance);
         setupResult = setup(shallowReadonly(instance.props), {
             emit: instance.emit
@@ -489,8 +467,6 @@ function nextTick(fn) {
     return fn ? p.then(fn) : p;
 }
 function queueFlush() {
-    // 控制微任务的分配，执行站执行期间只需要分配一次微任务即可。
-    // 等到执行栈清空，执行微任务时再打开开关，允许再分配微任务。
     if (isFlushPending)
         return;
     isFlushPending = true;
@@ -598,7 +574,6 @@ function createRenderer(options) {
         }
         else if (shapeFlag & exports.EShapeFlags.ARRAY_CHILDREN) {
             if (prevShapflag & exports.EShapeFlags.TEXT_CHILDREN) {
-                // 老的children是string，新的是array
                 hostSetElementText(container, '');
                 mountChildren(c2, container, parent);
             }
@@ -611,8 +586,6 @@ function createRenderer(options) {
         let e1 = c1.length - 1;
         let e2 = c2.length - 1;
         let i = 0;
-        // 1. 双端对比，确定变化范围
-        // 向右对比
         while (i <= e1 && i <= e2) {
             const prevChild = c1[i];
             const nextChild = c2[i];
@@ -624,7 +597,6 @@ function createRenderer(options) {
             }
             i++;
         }
-        // 向左对比
         while (i <= e1 && i <= e2) {
             const prevChild = c1[e1];
             const nextChild = c2[e2];
@@ -637,19 +609,8 @@ function createRenderer(options) {
             e1--;
             e2--;
         }
-        // 现在确定变化范围了，进行处理
-        // 首先处理有序的变化，比如单侧的添加删除
         if (i > e1) {
             if (i <= e2) {
-                // 不改变顺序，纯添加
-                /**
-                 * 确认插入位置, 1. 左侧插入 2. 右侧插入
-                 * 插入点应为 e2+1
-                 * 对于左侧插入 c2[e2+1]自然可以获取到el
-                 * 但是对于右侧插入， c2[e2+1]的vnode还没有进行渲染，是获取不到el的，el还是初始化时的null
-                 * 但是还是需要判断的，比如 ab -> abc e2 为c的位置，c2[e2+1]是undefined
-                 * 修改 insert 方法，换为insertBefore, 此 API 第二个参数如果为null，效果与append相同
-                 */
                 let nextPosition = e2 + 1;
                 let anchor = nextPosition < c2.length ? c2[nextPosition].el : null;
                 while (i <= e2) {
@@ -659,31 +620,20 @@ function createRenderer(options) {
             }
         }
         else if (i > e2 && i <= e1) {
-            // 单侧删除
             while (i <= e1) {
                 hostRemove(c1[i].el);
                 i++;
             }
         }
         else {
-            /**
-             * 这里就是 i < e1 && i < e2 的部分了。
-             * 对这部分，
-             * 1. 删除oldChildren里有，而newChildren中没有的vnod
-             * 2. 处理oldChildren&newChildren都有的且需要改变位置的vnode
-             * 3. 创建newChildren里有，而oldChildren中没有的vnode
-             */
             let s1 = i;
             let s2 = i;
             let patched = 0;
             let toBePatched = e2 - s2 + 1;
             let newKeyToNewIndexMap = new Map();
-            // 初始化newIndex -> oldIndex的映射，( 从0到toBePatched )
             let newIndexToOldIndexMap = new Array(toBePatched).fill(0);
-            // 控制是否需要计算最长递增子序列
             let moved = false;
             let maxNewIndex = 0;
-            // 先创建一个newChildren中每一个child的key-index的字典，方便后续查找，降低时间复杂度
             for (let i = s2; i <= e2; i++) {
                 let nextChild = c2[i];
                 newKeyToNewIndexMap.set(nextChild.key, i);
@@ -695,7 +645,6 @@ function createRenderer(options) {
                     continue;
                 }
                 let newIndex;
-                // 对当前的 prevChild，判断他是否也在newChildren中
                 if (prevChild.key !== null) {
                     newIndex = newKeyToNewIndexMap.get(prevChild.key);
                 }
@@ -708,9 +657,7 @@ function createRenderer(options) {
                         }
                     }
                 }
-                // 根据newIndex做处理
                 if (newIndex === undefined) {
-                    // 删除
                     hostRemove(prevChild.el);
                 }
                 else {
@@ -725,18 +672,6 @@ function createRenderer(options) {
                     patched++;
                 }
             }
-            /**
-             * 这里是在计算最长递增子序列
-             * 比如 [a,b,c] -> [c,a,b] 的变化，
-             * 只需要挪动 c 就可以了，而 ab 不用去处理。
-             * 所以通过 newIndexToOldIndexMap 去创建一个vnode的 newIndex 对应在 oldChildren 中的一个 oldIndex，
-             * 然后去计算最长递增子序列，这个子序列内的vnode就是不用处理的
-             * 比如上面的 abc -> cab,
-             * newIndexToOldIndexMap: [0: 2,   1: 0,   2: 1]
-             * 计算出的最长递增子序列为， [0, 1]
-             * 而这两个元素对应的索引就是vnode 在 newChildren 中的索引, [1,2]
-             * 也就是说newChildren中索引为[1,2]的元素是不需要处理的。
-             */
             let increasingNewIndexSubsequence = moved ? getSequence(newIndexToOldIndexMap) : [];
             let j = increasingNewIndexSubsequence.length - 1;
             for (let i = toBePatched - 1; i >= 0; i--) {
@@ -744,18 +679,10 @@ function createRenderer(options) {
                 const nextPosition = currentPosition + 1;
                 const anchor = nextPosition < c2.length ? c2[nextPosition].el : null;
                 if (newIndexToOldIndexMap[i] === 0) {
-                    // 新建
                     patch(null, c2[currentPosition], container, parent, anchor);
                 }
                 else if (moved) {
                     if (j < 0 || i !== increasingNewIndexSubsequence[j]) {
-                        /**
-                         * 交换位置
-                         * 但是为什么不在这通过patch交换位置呢，还要对比props和children？
-                         * 因为这里出现的需要交换位置的都是新老children中都存在的，
-                         * 而都存在的这个vnode，在遍历oldChildren的过程中，识别到是同一个vnode，就已经去patch了
-                         * 所以这里只处理顺序
-                         */
                         hostInsert(c2[currentPosition].el, container, anchor);
                     }
                     else {
@@ -1033,19 +960,19 @@ function createCodegenContext() {
 }
 function genNode(node, context) {
     switch (node.type) {
-        case "text" /* ENodeType.TEXT */:
+        case "text":
             genText(node, context);
             break;
-        case "interpolation" /* ENodeType.INTERPOLATION */:
+        case "interpolation":
             genInterpolation(node, context);
             break;
-        case "simple_expression" /* ENodeType.SIMPLE_EXPRESSION */:
+        case "simple_expression":
             genExpression(node, context);
             break;
-        case "element" /* ENodeType.ELEMENT */:
+        case "element":
             genElement(node, context);
             break;
-        case "compound_expression" /* ENodeType.COMPOUND_EXPRESSION */:
+        case "compound_expression":
             genCompoundExpression(node, context);
             break;
     }
@@ -1136,7 +1063,7 @@ function baseParse(content) {
 }
 function createRoot(children) {
     return {
-        type: "root" /* ENodeType.ROOT */,
+        type: "root",
         children
     };
 }
@@ -1165,11 +1092,6 @@ function parseChildren(context, ancestor) {
     return nodes;
 }
 function isEnd(context, ancestor) {
-    /**
-     * 结束的条件
-     * 1. context.source 为空
-     * 2. 遇到结束标签了
-     */
     let s = context.source;
     if (s.startsWith("</")) {
         for (let i = ancestor.length - 1; i >= 0; i--) {
@@ -1185,29 +1107,12 @@ function startsWithCloseTagAndIsSameTag(context, tag) {
     return context.source.startsWith("</") && tag.toLowerCase() === context.source.slice(2, 2 + tag.length).toLowerCase();
 }
 function parseElement(context, ancestor) {
-    let element = parseTag(context, 0 /* EElementStatus.START */);
+    let element = parseTag(context, 0);
     ancestor.push(element.tag);
     element.children = parseChildren(context, ancestor);
     ancestor.pop();
     if (startsWithCloseTagAndIsSameTag(context, element.tag) && !loseEndTag(context, ancestor, element.tag)) {
-        // 还有 <div> <div> </div> 这种情况需要处理
-        // 这时，ancestor栈中的div数量应该比context.source中少一个
-        // 所以当 ancestor>div's count === context.source中div的数量-1时，标签才是正常的
-        /**
-         * 上面说的情况现在的判断也可以捕获到缺少标签。
-         * <div><span></div>
-         * 这种情况，因为span跟后面的div不匹配，所以肯定不会命中这个if，所以走到else中
-         * <div><div></div>
-         * 这种情况，中间的div调用startsWithCloseTagAndIsSameTag这个判断，结果为true，
-         * 会把后面的父元素的结束标签删掉，
-         * 然后父元素在最后需要处理结束标签时，因为 context.source 已经为空字符串了，
-         * 所以肯定不会等于element.tag，也会进入else的逻辑报错。
-         *
-         * 所以最后的问题就是，进入错误逻辑的本该是子div元素，现在是父div元素。错误定位不准确。
-         *
-         * 添加判断 !loseEndTag(context, ancestor, element.tag)
-         */
-        parseTag(context, 1 /* EElementStatus.END */);
+        parseTag(context, 1);
     }
     else {
         throw new Error(`缺少结束标签${element.tag}`);
@@ -1228,10 +1133,10 @@ function parseTag(context, type) {
     let tag = match[1];
     advanced(context, match[0].length);
     advanced(context, 1);
-    if (type === 1 /* EElementStatus.END */)
+    if (type === 1)
         return;
     return {
-        type: "element" /* ENodeType.ELEMENT */,
+        type: "element",
         tag,
     };
 }
@@ -1246,7 +1151,7 @@ function parseText(context) {
     });
     let content = parseTextData(context, endIndex);
     return {
-        type: "text" /* ENodeType.TEXT */,
+        type: "text",
         content,
     };
 }
@@ -1260,9 +1165,9 @@ function parseInterpolation(context) {
     let content = rawContent.trim();
     advanced(context, closeDelimiter.length);
     return {
-        type: "interpolation" /* ENodeType.INTERPOLATION */,
+        type: "interpolation",
         content: {
-            type: "simple_expression" /* ENodeType.SIMPLE_EXPRESSION */,
+            type: "simple_expression",
             content,
         }
     };
@@ -1308,11 +1213,11 @@ function traverseNode(node, context) {
         cb && exitFns.push(cb);
     }
     switch (node.type) {
-        case "root" /* ENodeType.ROOT */:
-        case "element" /* ENodeType.ELEMENT */:
+        case "root":
+        case "element":
             traverseChildren(node, context);
             break;
-        case "interpolation" /* ENodeType.INTERPOLATION */:
+        case "interpolation":
             context.helper(TO_DISPLAY_STRING);
     }
     let i = exitFns.length;
@@ -1329,16 +1234,16 @@ function traverseChildren(node, context) {
 }
 
 function isText(node) {
-    return node.type === "text" /* ENodeType.TEXT */ || node.type === "interpolation" /* ENodeType.INTERPOLATION */;
+    return node.type === "text" || node.type === "interpolation";
 }
 function isElement(node) {
-    return node.type === "element" /* ENodeType.ELEMENT */;
+    return node.type === "element";
 }
 function shouldWrapTextNode(node) {
     return isText(node) || isCompound(node);
 }
 function isCompound(node) {
-    return node.type === "compound_expression" /* ENodeType.COMPOUND_EXPRESSION */;
+    return node.type === "compound_expression";
 }
 
 function transformChildren(node, context) {
@@ -1347,23 +1252,12 @@ function transformChildren(node, context) {
             const { children } = node;
             const length = children.length;
             if (length === 1) {
-                /**
-                 * 如果只有一个child，但是child类型为element，也是需要放到数组中处理的。
-                 */
                 const child = children[0];
                 if (isElement(child)) {
                     node.addArraySymbol = true;
                 }
             }
             else if (length > 1) {
-                /**
-                 * 遍历children，对其中的 text/interpolation/compound,需要用 createTextVNode 包裹
-                 * 仅对 elementNode.children 中的文本节点添加 createTextVNode 包裹的标记
-                 *
-                 * 因为在runtime-core中，处理children只识别string/array类型，在这里，只有一个string是可以渲染的。
-                 * 在array类型的children中，遍历到每一个child，去patch，在patch中，只有一个string，就无法正常渲染了，
-                 * 所以需要通过createTextVNode包裹。
-                 */
                 node.addArrayWrapper = true;
                 for (let i = 0; i < children.length; i++) {
                     const child = children[i];
@@ -1383,8 +1277,6 @@ function transformElement(node, context) {
             context.helper(CREATE_ELEMENT_VNODE);
             const vnodeTag = `'${node.tag}'`;
             let vnodeProps;
-            // const vnodeChildren = node.children[0];
-            // node.codegenNode = createVNodeCall(vnodeTag, vnodeProps, vnodeChildren);
             node.tag = vnodeTag;
             node.props = vnodeProps;
         };
@@ -1392,7 +1284,7 @@ function transformElement(node, context) {
 }
 
 function transformExpression(node) {
-    if (node.type === "interpolation" /* ENodeType.INTERPOLATION */) {
+    if (node.type === "interpolation") {
         const expressionNode = node.content;
         processExpression(expressionNode);
     }
@@ -1415,7 +1307,7 @@ function transformText(node) {
                         if (isText(next)) {
                             if (!currentContainer) {
                                 currentContainer = children[i] = {
-                                    type: "compound_expression" /* ENodeType.COMPOUND_EXPRESSION */,
+                                    type: "compound_expression",
                                     children: [child]
                                 };
                             }

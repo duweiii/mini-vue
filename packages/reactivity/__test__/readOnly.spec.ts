@@ -1,4 +1,5 @@
 import { isProxy, isReadonly, readOnly } from "../src/reactive";
+import { vi } from 'vitest'
 
 describe("readonly", ()=>{
   it("happy path", () => {
@@ -13,7 +14,7 @@ describe("readonly", ()=>{
 
   it("warn on set", () => {
     let obj = readOnly({foo: 1});
-    console.warn = jest.fn()
+    console.warn = vi.fn()
     obj.foo = 2;
     expect(console.warn).toBeCalled()
   })

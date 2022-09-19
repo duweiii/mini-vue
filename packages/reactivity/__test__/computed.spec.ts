@@ -1,10 +1,10 @@
 import { computed } from "../src/computed"
 import { reactive } from "../src/reactive"
-
+import { vi } from 'vitest';
 describe("computed", () => {
   it("happy path", () => {
     const a = reactive({ foo: 1 });
-    const getter = jest.fn(() => a.foo)
+    const getter = vi.fn(() => a.foo)
     const v = computed(getter);
 
     // lazy
