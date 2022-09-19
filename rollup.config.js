@@ -1,15 +1,30 @@
+// import typescript from "@rollup/plugin-typescript";
+// import pkg from "./package.json";
+// export default {
+//   input: "./src/index.ts",
+//   output: [
+//     {
+//       format: "cjs",
+//       file: pkg.main
+//     },
+//     {
+//       format: "esm",
+//       file: pkg.module
+//     }
+//   ],
+//   plugins: [typescript()] 
+// }
 import typescript from "@rollup/plugin-typescript";
-import pkg from "./package.json";
 export default {
-  input: "./src/index.ts",
+  input: "./packages/vue/src/index.ts",
   output: [
     {
       format: "cjs",
-      file: pkg.main
+      file: './packages/vue/dist/guide-mini-vue.cjs.js'
     },
     {
       format: "esm",
-      file: pkg.module
+      file: "./packages/vue/dist/guide-mini-vue.esm.js"
     }
   ],
   plugins: [typescript()] 

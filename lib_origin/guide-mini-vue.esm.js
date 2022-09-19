@@ -1,7 +1,3 @@
-function toDisplayString(value) {
-    return String(value);
-}
-
 var EShapeFlags;
 (function (EShapeFlags) {
     EShapeFlags[EShapeFlags["ELEMENT"] = 1] = "ELEMENT";
@@ -10,32 +6,6 @@ var EShapeFlags;
     EShapeFlags[EShapeFlags["ARRAY_CHILDREN"] = 8] = "ARRAY_CHILDREN";
     EShapeFlags[EShapeFlags["SLOT_CHILDREN"] = 16] = "SLOT_CHILDREN";
 })(EShapeFlags || (EShapeFlags = {}));
-
-const extend = Object.assign;
-const isObject = (value) => {
-    return typeof value === 'object';
-};
-const isString = (value) => {
-    return typeof value === 'string';
-};
-const EMPTY_OBJECT = {};
-const hasChanged = (value, newValue) => {
-    return !Object.is(value, newValue);
-};
-const hasOwn = (object, key) => {
-    return Object.prototype.hasOwnProperty.call(object, key);
-};
-const camelize = (str) => {
-    return str.replace(/-(\w)/g, (_, c) => {
-        return c ? c.toUpperCase() : '';
-    });
-};
-const capitalize = (str) => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-};
-const toHandleKey = (str) => {
-    return 'on' + capitalize(str);
-};
 
 const Fragment = Symbol("Fragment");
 const Text = Symbol("Text");
@@ -81,6 +51,36 @@ function renderSlots(slots, name, data) {
         }
     }
 }
+
+function toDisplayString(value) {
+    return String(value);
+}
+
+const extend = Object.assign;
+const isObject = (value) => {
+    return typeof value === 'object';
+};
+const isString = (value) => {
+    return typeof value === 'string';
+};
+const EMPTY_OBJECT = {};
+const hasChanged = (value, newValue) => {
+    return !Object.is(value, newValue);
+};
+const hasOwn = (object, key) => {
+    return Object.prototype.hasOwnProperty.call(object, key);
+};
+const camelize = (str) => {
+    return str.replace(/-(\w)/g, (_, c) => {
+        return c ? c.toUpperCase() : '';
+    });
+};
+const capitalize = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+};
+const toHandleKey = (str) => {
+    return 'on' + capitalize(str);
+};
 
 let activeEffect;
 let shouldTrack = false;
@@ -229,17 +229,6 @@ function readOnly(obj) {
 }
 function shallowReadonly(obj) {
     return createActiveObject(obj, shallowReadonlyHandlers);
-}
-function isProxy(value) {
-    return isReactive(value) || isReadonly(value);
-}
-function isReactive(obj) {
-    let res = obj["__v_isReactive" /* ERactiveFlags.isReactive */];
-    return !!res;
-}
-function isReadonly(obj) {
-    let res = obj["__v_isReadonlu" /* ERactiveFlags.isReadonly */];
-    return !!res;
 }
 function createActiveObject(raw, handlers) {
     return new Proxy(raw, handlers);
@@ -956,28 +945,7 @@ var runtimeDom = /*#__PURE__*/Object.freeze({
     inject: inject,
     createRenderer: createRenderer,
     nextTick: nextTick,
-    toDisplayString: toDisplayString,
-    reactive: reactive,
-    readOnly: readOnly,
-    shallowReadonly: shallowReadonly,
-    isReactive: isReactive,
-    isProxy: isProxy,
-    isReadonly: isReadonly,
-    ref: ref,
-    isRef: isRef,
-    unRef: unRef,
-    proxyRefs: proxyRefs,
-    effect: effect,
-    get EShapeFlags () { return EShapeFlags; },
-    extend: extend,
-    isObject: isObject,
-    isString: isString,
-    EMPTY_OBJECT: EMPTY_OBJECT,
-    hasChanged: hasChanged,
-    hasOwn: hasOwn,
-    camelize: camelize,
-    capitalize: capitalize,
-    toHandleKey: toHandleKey
+    toDisplayString: toDisplayString
 });
 
 const TO_DISPLAY_STRING = Symbol('toDisplayString');
@@ -1446,4 +1414,4 @@ function compileToFunction(template) {
 }
 registerCompiler(compileToFunction);
 
-export { EMPTY_OBJECT, EShapeFlags, camelize, capitalize, createApp, createVNode as createElementVNode, createRenderer, createTextVNode, effect, extend, getCurrentInstance, h, hasChanged, hasOwn, inject, isObject, isProxy, isReactive, isReadonly, isRef, isString, nextTick, provide, proxyRefs, reactive, readOnly, ref, registerCompiler, renderSlots, shallowReadonly, toDisplayString, toHandleKey, unRef };
+export { createApp, createVNode as createElementVNode, createRenderer, createTextVNode, getCurrentInstance, h, inject, nextTick, provide, reactive, ref, registerCompiler, renderSlots, toDisplayString };
