@@ -32,7 +32,6 @@ describe('code generate', () => {
     const ast = baseParse("<div>hi,{{message}}</div>")
     transform(ast, { nodeTransforms: [ transformExpression, transformElement, transformText]})
 
-    console.log("哈哈哈", ast)
     const { code } = generate( ast );
     expect( code ).toMatchSnapshot();
   })
@@ -40,7 +39,6 @@ describe('code generate', () => {
   it("happy path: multiple element", () => {
     const ast = baseParse("<div>hi,{{message}}<p>embed-element</p></div>")
     transform(ast, { nodeTransforms: [ transformExpression, transformChildren, transformElement, transformText]})
-    console.log( ast , "what happen")
     const { code } = generate( ast );
     expect( code ).toMatchSnapshot();
   })
