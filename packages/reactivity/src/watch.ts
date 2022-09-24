@@ -19,6 +19,7 @@ import { effect } from "./effect";
 export const watch = (firstParam, callback, options?) => {
     // 先支持ref
     const getter = () => firstParam?.value;
+    // 绑定依赖
     effect(getter, {
         scheduler: callback
     })
