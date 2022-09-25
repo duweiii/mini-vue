@@ -1,6 +1,15 @@
 import { reactive } from '../src/reactive'
 import { ref } from '../src/ref'
 import { watch } from '../src/watch'
+
+function asyncMaker (n = 2) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(1)
+    }, n * 1000)
+  }) 
+}
+
 describe("watch happy path", () => {
     // 1-监听对象的几种case
     it('happy path 1 - ref', () => {
@@ -77,7 +86,7 @@ describe("watch happy path", () => {
     })
 
     // 3-options.immediately
-    it('oldValue&newValue', () => {
+    it('execute callback immediately', () => {
       const num = ref(0);
       let count = 0;
       watch(
@@ -91,47 +100,41 @@ describe("watch happy path", () => {
       )
       expect(count).toBe(1)
     })
+    
+    // 3-options.flush
+    it('occasion of trigger callback 1 - pre', () => {
+      const num = ref(0);
+      let count = 0;
+      watch(
+        num,
+        () => {
+          count = 5;
+        },
+        { flush: 'pre' }
+      )
+      num.value += 1;
+      expect(count).toBe(5)
+    })
+    it('occasion of trigger callback 2 - post', () => {
+      const num = ref(0);
+      let count = 0;
+      watch(
+        num,
+        () => {
+          count = 5;
+        },
+        { flush: 'post' }
+      )
+      num.value += 1;
+      
+      expect(count).toBe(0)
+
+      Promise.resolve()
+      .then(()=>{
+        expect(count).toBe(5)
+      })
+    })
 })
-
-// Test
-// function demoTest(){
- 
-//   const reactiveValue = reactive({
-//       name: 1,
-//       age: 2
-//   })  
-  
-//   document.getElementById("ref").addEventListener('click', () => {
-//       refValue.value += 1;
-//       // console.log(`控制callback的校验时机\n'pre为直接执行'\n'post'为分配到为任务队列执行，也就是执行栈清空后再执行`)
-//   })
-  
-//   document.getElementById("reactive").addEventListener('click', () => {
-//       reactiveValue.name = Math.random();
-//       // reactiveValue.age = Math.random();
-//   })
-
-//   // watch([ () => reactiveValue.name, refValue ], () => {
-//   //     console.log("响应式数据更新，执行scheduler")
-//   // })
-//   watch(
-//     refValue,
-//     (oldValue, newValue) => {
-//       console.log(`oldValue: ${oldValue}, newValue: ${newValue}`)
-//     },
-//     {
-//       immediately: false,
-//       flush: 'post'
-//     }
-//   )
-// }
-// demoTest();
-
-
-
-
-
-
 
 // function onInvalidateTest(){
 //   const refValue = ref(0);
@@ -157,12 +160,5 @@ describe("watch happy path", () => {
 //       })
 //     }
 //   )
-// }
-// function timeoutPromise () {
-//   return new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       resolve(1)
-//     }, 2000)
-//   }) 
 // }
 // onInvalidateTest()
