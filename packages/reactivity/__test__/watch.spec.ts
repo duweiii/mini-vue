@@ -75,6 +75,22 @@ describe("watch happy path", () => {
       expect(oldV).toBe(1)
       expect(newV).toBe(2)
     })
+
+    // 3-options.immediately
+    it('oldValue&newValue', () => {
+      const num = ref(0);
+      let count = 0;
+      watch(
+        num,
+        () => {
+          count++;
+        },
+        {
+          immediately: true
+        }
+      )
+      expect(count).toBe(1)
+    })
 })
 
 // Test
