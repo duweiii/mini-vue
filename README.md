@@ -27,6 +27,8 @@
   - [x] runner
   - [x] scheduler
   - [x] stop & onStop
+  
+- [x] watch
 
 
 ## runtime-core
