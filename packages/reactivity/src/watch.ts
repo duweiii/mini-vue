@@ -35,7 +35,7 @@ import { isRef } from "./ref";
    if( typeof params !== "object" || params === null || seen.has(params)) return ;
    // 标记已读
    seen.add(params)
-   // 遍历对象,使用for in处理，因为可能是{}或者[]
+   // for in遍历
    for (const key in params) {
      traverse(params[key], seen)
    }
