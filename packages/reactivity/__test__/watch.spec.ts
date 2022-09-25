@@ -1,15 +1,7 @@
 import { reactive } from '../src/reactive'
 import { ref } from '../src/ref'
 import { watch } from '../src/watch'
-
-function asyncMaker (n = 2) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(1)
-    }, n * 1000)
-  }) 
-}
-
+import { vi } from 'vitest'
 describe("watch happy path", () => {
     // 1-监听对象的几种case
     it('happy path 1 - ref', () => {
@@ -101,7 +93,7 @@ describe("watch happy path", () => {
       expect(count).toBe(1)
     })
     
-    // 3-options.flush
+    // 4-options.flush
     it('occasion of trigger callback 1 - pre', () => {
       const num = ref(0);
       let count = 0;
@@ -126,7 +118,7 @@ describe("watch happy path", () => {
         { flush: 'post' }
       )
       num.value += 1;
-      
+
       expect(count).toBe(0)
 
       Promise.resolve()
@@ -134,31 +126,54 @@ describe("watch happy path", () => {
         expect(count).toBe(5)
       })
     })
+
+    // 5-支持清除副作用函数
+    it('cleanup function - 1 - normal', () => {
+      const r = ref(0);
+      let count = 0;
+      watch(
+        r,
+        (oldv,newv, onInvalidate) => {
+          let control = true;
+          Promise.resolve().then(() => {
+            if( control ){
+              count = 5;
+            }
+          })
+        }
+      )
+      r.value = 1;
+      expect(count).toBe(0)
+      Promise.resolve().then( () => expect(count).toBe(5) )
+    })
+
+    it('cleanup function - 2 - use cleanup', () => {
+      const r = ref(0);
+      let count = 0;
+      watch(
+        r,
+        (oldv,newv, onInvalidate) => {
+          let control = true;
+          onInvalidate(() => {
+            count = 2;
+            control = false;
+          })
+          Promise.resolve().then(() => {
+            if( control ){
+              console.log("当前log只执行一次(第一次没命中判断，第二次命中),因为当第二次更新ref值时，执行第一次的cleanup，第一次的control修改为false，无法进入判断分支了。")
+              count = 5;
+            }
+          })
+        }
+      )
+      r.value = 1;
+      expect(count).toBe(0)
+      r.value = 2;
+      expect(count).toBe(2)
+
+      Promise.resolve().then( () => {
+        expect(count).toBe(5)
+      } )
+
+    })
 })
-
-// function onInvalidateTest(){
-//   const refValue = ref(0);
-  
-//   document.getElementById("ref").addEventListener('click', () => {
-//       refValue.value += 1;
-//   })
-
-//   watch(
-//     refValue,
-//     (oldValue, newValue, onInvalidate) => {
-//       let control_ = true;
-
-//       onInvalidate(()=>{
-//         control_ = false;
-//       })
-
-//       timeoutPromise()
-//       .then( () => {
-//         if( control_ ){
-//           console.log("哈哈哈哈", refValue.value )
-//         }
-//       })
-//     }
-//   )
-// }
-// onInvalidateTest()
