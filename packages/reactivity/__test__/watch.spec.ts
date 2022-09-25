@@ -56,6 +56,25 @@ describe("watch happy path", () => {
       expect(count).toBe(2)
     })
     
+    // 2-callback中可以接收新值旧值
+    it('oldValue&newValue', () => {
+      const num = ref(0);
+      let oldV,newV;
+      watch(
+        num,
+        (oldValue, newValue) => {
+          oldV = oldValue;
+          newV = newValue;
+        }
+      )
+
+      num.value += 1;
+      expect(oldV).toBe(0)
+      expect(newV).toBe(1)
+      num.value += 1;
+      expect(oldV).toBe(1)
+      expect(newV).toBe(2)
+    })
 })
 
 // Test
